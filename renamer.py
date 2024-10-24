@@ -6,7 +6,7 @@ def rename_files(directory):
     
     for filename in files:
         # Check if the file starts with "zadanie"
-        if filename.startswith("merskadupka"):
+        if filename.startswith("zadanie"):
             # Construct the full file path
             old_file = os.path.join(directory, filename)
             
@@ -15,7 +15,7 @@ def rename_files(directory):
                 continue
             
             # Construct the new file name
-            new_filename = filename.replace("merskadupka", "cwiczenie", 1)
+            new_filename = filename.replace("zadanie", "cwiczenie", 1)
             new_file = os.path.join(directory, new_filename)
             
             # Rename the file
