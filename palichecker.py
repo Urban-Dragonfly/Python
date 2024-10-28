@@ -2,6 +2,7 @@ import argparse
 import sys
 import random
 from termcolor import colored
+from logger import logger
 
 sys.stdout.reconfigure(encoding='utf-8')
 
@@ -74,11 +75,12 @@ def main():
     parser = argparse.ArgumentParser(description="Accept a full sentence as one argument")
     parser.add_argument('sentence', nargs='*', help="The sentence to be accepted as one argument")
     args = parser.parse_args()
-    
+    logger.info("User input: %s", args)
+
     is_single_word = False
     if not args.sentence:
         sentence = generate_random_palindrome()
-        
+        logger.info("Generated sentence: %s", sentence)
     else:
         sentence = ' '.join(args.sentence)
         if len(args.sentence) == 1:
@@ -91,6 +93,7 @@ def main():
     color = 'green' if is_palindrome(sentence) else 'red'
 
     print(colored(f"The {input_type} {result_type}.", color))
-
+    logger.info("The %s %s.", input_type, result_type)
+    
 if __name__ == "__main__":
     main()
