@@ -74,10 +74,11 @@ def main():
     parser = argparse.ArgumentParser(description="Accept a full sentence as one argument")
     parser.add_argument('sentence', nargs='*', help="The sentence to be accepted as one argument")
     args = parser.parse_args()
-
+    
+    is_single_word = False
     if not args.sentence:
         sentence = generate_random_palindrome()
-        is_single_word = False
+        
     else:
         sentence = ' '.join(args.sentence)
         if len(args.sentence) == 1:
