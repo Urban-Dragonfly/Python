@@ -9,88 +9,99 @@ def get_operation():
         print(f"Wpisz {operation} aby uruchomić {operations[operation][1]}")
     operation = input()
     if operation in operations:
-        logger.info(f"Wybrano operacje: {operations[operation][0]}")
+        logger.debug(f"Wybrano operacje: {operations[operation][1]}")
         return operation
     else:
-        logger.error(f"Niepoprawna operacja: {operation}")
+        logger.warning(f"Niepoprawna operacja: {operation}")
         print("Niepoprawna operacja. Sprobuj ponownie.")
         return get_operation()
     
 def get_numbers(operation):
     numbers = []
-    if operation == "/":
-        try:
-            dividend = input("Podaj dzielną: ")
-            numbers.append(float(dividend))
-        except ValueError:
-            logger.error("Podano nieprawidłową wartość. divisor = {divisor}")
-            print("Podano nieprawidłową wartość. Sprobuj ponownie.")
-            return get_numbers("/")
-        while True:
-            try:
-                divisor = input("Podaj dzielnik, by skończyć naciśnij enter: ")
-                if divisor == "":
-                    if len(numbers) < 2:
-                        print("Podano za mało składników. Sprobuj ponownie.")
-                        continue
-                    else:
-                        return numbers
-                if divisor == "0":
-                    logger.error("Nie można dzielić przez zero.")
-                    print("Eris umie dzielić przez zero, ten kalkulator nie!")
-                    continue
-                else:
-                    numbers.append(float(divisor))
-                    continue
-            except ValueError:
-                logger.error(f"Podano nieprawidłową wartość. divisor = {divisor}")
-                print(f"Eris umie dzielić przez {divisor}, ten kalkulator nie!")
+    while True:
+        if operation == "/" and not numbers:
+            prompt = "Podaj dzielną: "
+        elif operation == "/":
+            prompt = "Podaj dzielnik, by skończyć naciśnij enter: "
+        else:
+            prompt = f"Podaj składnik, by skończyć naciśnij enter: "
+        operand = input(prompt)
+        if operand == "":
+            if len(numbers) < 2:
+                print("Podano za mało składników. Spróbuj ponownie.")
                 continue
-    else:
-        while True:
-            operand = input(f"Podaj składniki potrzebne aby wykonać {operations[operation][1]}, by skończyć naciśnij enter:")
-            if operand == "":
-                if len(numbers) < 2:
-                    print("Podano za mało składników. Sprobuj ponownie.")
-                    continue
-                else:
-                    logger.info(f"Wybrane składniki to: {' i '.join(map(str, numbers))}")
-                    return numbers
             else:
-                try:
-                    num = float(operand)
-                    numbers.append(num)
-                    continue
-                except ValueError:
-                    logger.error("Podano nieprawidłową wartość: {operand}.")
-                    print("Podano nieprawidłową wartość. Sprobuj ponownie.")
-                    continue
+                logger.debug(f"Wybrane składniki to: {' i '.join(map(str, numbers))}")
+                return numbers
+        try:
+            num = float(operand)
+            if operation == "/" and num == 0 and len(numbers) > 0:
+                logger.warning("Nie można dzielić przez zero.")
+                print("Eris umie dzielić przez zero, ten kalkulator nie!")
+                continue
+            numbers.append(num)
+        except ValueError:
+            logger.error(f"Podano nieprawidłową wartość: {operand}.")
+            print("Podano nieprawidłową wartość. Spróbuj ponownie.")
+            continue
 
-def perform_calculation(operation, numbers):
+def perform_calculation(operation, *args):
     calculator = operations[operation][0]
-    result = calculator(numbers)
-    return result
-    
-def addition(numbers):
-    return sum(numbers)
-
-def subtraction(numbers):
-    result = numbers[0]
-    for num in numbers[1:]:
-        result -= num
+    result = calculator(*args)
     return result
 
-def multiplication(numbers):
-    result = 1
-    for num in numbers:
-        result *= num
-    return result
+def addition(a, b, *args):
+    operands = (a, b) + args
+    logger.debug(f"Adding numbers: {operands}")
+    try:
+        result = sum(operands)
+        logger.debug(f"Addition result: {result}")
+        return result
+    except ValueError as e:
+        logger.error(f"ValueError in addition: {e}")
+        raise
 
-def division(numbers):
-    result = numbers[0]
-    for num in numbers[1:]:
-        result /= num
-    return result
+def subtraction(a, b, *args):
+    operands = (a, b) + args
+    logger.debug(f"Subtracting numbers: {operands}")
+    try:
+        result = a - b
+        for num in args:
+            result -= num
+        logger.debug(f"Subtraction result: {result}")
+        return result
+    except ValueError as e:
+        logger.error(f"ValueError in subtraction: {e}")
+        raise
+
+def multiplication(a, b, *args):
+    operands = (a, b) + args
+    logger.debug(f"Multiplying numbers: {operands}")
+    try:
+        result = a * b
+        for num in args:
+            result *= num
+        logger.debug(f"Multiplication result: {result}")
+        return result
+    except ValueError as e:
+        logger.error(f"ValueError in multiplication: {e}")
+        raise
+
+def division(a, b, *args):
+    operands = (a, b) + args
+    logger.debug(f"Dividing numbers: {operands}")
+    try:
+        result = a / b
+        for num in args:
+            result /= num
+        logger.debug(f"Division result: {result}")
+        return result
+    except ZeroDivisionError as e:
+        logger.error(f"ZeroDivisionError in division: {e}")
+        raise
+    except ValueError as e:
+        logger.error(f"ValueError in division: {e}")
+        raise
 
 operations = {
     "+": (addition, "dodawanie"),
@@ -102,7 +113,7 @@ def main():
     print("*** Witaj w kalkulatorze! ***")
     operation = get_operation()
     numbers = get_numbers(operation)
-    result = perform_calculation(operation, numbers)
-    print("Wynik:", result)
+    result = perform_calculation(operation, *numbers)
+    print("Wynik:", f"{result:.2f}".rstrip('0').rstrip('.'))
 if __name__ == "__main__":
     main()
